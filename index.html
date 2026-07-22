@@ -138,13 +138,20 @@
   </div>
 
   <!-- DIRECT LINK TO NAMES.HTML -->
-  <a href="names.html" class="btn-red">لعبة جديدة</a>
+  <a href="names.html" class="btn-red" onclick="startNewGame()">لعبة جديدة</a>
   <button id="resume-session-btn" class="btn-resume" type="button" style="display: none;">استئناف آخر جلسة</button>
 
   <script>
     const lastPageKey = 'loupGarouLastClosedPage';
     const resumeButton = document.getElementById('resume-session-btn');
     const lastPage = localStorage.getItem(lastPageKey);
+
+    function startNewGame() {
+      localStorage.removeItem('loupGarouPlayers');
+      localStorage.removeItem('loupGarouRoles');
+      localStorage.removeItem('loupGarouDistributionState');
+      localStorage.removeItem(lastPageKey);
+    }
 
     if (lastPage && lastPage !== 'index.html') {
       resumeButton.style.display = 'block';

@@ -312,8 +312,11 @@
 
   <script>
     const currentPage = 'distribution.html';
+    let leavingGame = false;
     window.addEventListener('beforeunload', () => {
-      localStorage.setItem('loupGarouLastClosedPage', currentPage);
+      if (!leavingGame) {
+        localStorage.setItem('loupGarouLastClosedPage', currentPage);
+      }
     });
 
     let players = [];
@@ -438,6 +441,13 @@
 
     function clearDistributionState() {
       localStorage.removeItem(distributionStateKey);
+    }
+
+    function clearGameState() {
+      localStorage.removeItem('loupGarouPlayers');
+      localStorage.removeItem('loupGarouRoles');
+      localStorage.removeItem(distributionStateKey);
+      localStorage.removeItem('loupGarouLastClosedPage');
     }
 
     function loadCurrentPlayer() {
@@ -784,8 +794,8 @@
           setTimeout(() => {
             const finalCheck = confirm("انتهى وقت الانتظار! هل أنت متأكد تماماً من إنهاء اللعبة والعودة للشاشة الرئيسية؟");
             if (finalCheck) {
-              clearDistributionState();
-              localStorage.removeItem('loupGarouLastClosedPage');
+              leavingGame = true;
+              clearGameState();
               window.location.href = "index.html";
             }
           }, 100);
