@@ -216,6 +216,105 @@
       cursor: pointer;
     }
 
+    .cupid-btn {
+      min-width: 92px;
+      min-height: 34px;
+      padding: 6px 10px;
+      font-size: 12px;
+      background: linear-gradient(180deg, #ff8cc9 0%, #ff5ca8 100%);
+      color: white;
+      border: 1px solid #ffb6d9;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+      box-shadow: 0 0 10px rgba(255, 105, 180, 0.35);
+    }
+
+    .cupid-btn:active {
+      transform: scale(0.97);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 420px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      padding: 18px;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .modal-title {
+      color: #ff69b4;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .modal-message {
+      color: #ddd;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .cupid-select-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .cupid-select {
+      flex: 1;
+      min-width: 0;
+      padding: 10px;
+      font-size: 14px;
+      background: #222;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-action-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .modal-confirm-btn {
+      background: #e50914;
+      color: white;
+    }
+
+    .modal-cancel-btn {
+      background: #333;
+      color: white;
+    }
+
     /* Styles specifically for Cursed special layout */
     .cursed-container {
       display: flex;
@@ -310,6 +409,24 @@
     <button id="end-game-btn" class="btn-red" onclick="confirmEndGame()">إنهاء وإنشاء لعبة جديدة</button>
   </div>
 
+  <div id="cupid-modal" class="modal-overlay" onclick="handleCupidBackdrop(event)">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cupid-modal-title">
+      <div id="cupid-modal-title" class="modal-title">عصفور الحب</div>
+      <div class="modal-message">
+        اختر لاعبين أحياء ليصبحا عشيقين.
+        بعد الحفظ ستتلوّن أسماؤهما باللون الوردي ثم تُعاد الصفحة تلقائياً.
+      </div>
+      <div class="cupid-select-row">
+        <select id="cupid-player-a" class="cupid-select"></select>
+        <select id="cupid-player-b" class="cupid-select"></select>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-action-btn modal-cancel-btn" onclick="closeCupidModal()">إلغاء</button>
+        <button class="modal-action-btn modal-confirm-btn" onclick="confirmCupidSelection()">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const currentPage = 'distribution.html';
     let leavingGame = false;
@@ -327,6 +444,7 @@
     let currentRevealed = false;
     let moderatorRevealTimer = null;
     let moderatorRevealReady = false;
+    let cupidModalIndex = null;
     const distributionStateKey = 'loupGarouDistributionState';
 
     // Linking Arabic role names to English filenames directly in the same folder
@@ -580,8 +698,8 @@
 
     function buildStatusOptions(currentVal, isCursed) {
       const baseOptions = isCursed
-        ? ["حي", "ميت", "ساكت", "محمي", "مخري عليه", "عشيق", "يتحول إلى دئب"]
-        : ["حي", "ميت", "ساكت", "محمي", "مخري عليه", "عشيق"];
+        ? ["حي", "ميت", "ساكت", "محمي", "مخري عليه", "يتحول إلى دئب"]
+        : ["حي", "ميت", "ساكت", "محمي", "مخري عليه", ];
 
       let optionsHTML = baseOptions.map((option) => {
         return `<option value="${option}" ${currentVal === option ? 'selected' : ''}>${option}</option>`;
@@ -593,6 +711,127 @@
 
       optionsHTML += `<option value="__custom__">اضافة..</option>`;
       return optionsHTML;
+    }
+
+    function isPlayerAlive(item) {
+      const status = item?.status || 'حي';
+      return !status.includes("ميت") && !status.includes("ميّت");
+    }
+
+    function isCupidRole(roleName) {
+      return roleName && roleName.includes("عصفور الحب");
+    }
+
+    function getCupidActionButtonHtml(idx) {
+      return `<button class="cupid-btn" onclick="openCupidModal(${idx})">عصفور الحب ♡</button>`;
+    }
+
+    function populateCupidOptions() {
+      const selectA = document.getElementById('cupid-player-a');
+      const selectB = document.getElementById('cupid-player-b');
+      const cupidItem = currentRenderedList[cupidModalIndex];
+
+      const alivePlayers = currentRenderedList.filter((item, idx) => {
+        return idx !== cupidModalIndex && isPlayerAlive(item);
+      });
+
+      const buildOptions = (selectedValue = '') => {
+        let html = '<option value="">اختر لاعباً</option>';
+        alivePlayers.forEach((item) => {
+          const isSelected = selectedValue === item.name ? 'selected' : '';
+          html += `<option value="${item.name.replace(/"/g, '&quot;')}" ${isSelected}>${item.name}</option>`;
+        });
+        return html;
+      };
+
+      if (!selectA || !selectB || !cupidItem) return;
+
+      selectA.innerHTML = buildOptions();
+      selectB.innerHTML = buildOptions();
+
+      selectA.value = '';
+      selectB.value = '';
+
+      if (alivePlayers.length < 2) {
+        selectA.disabled = true;
+        selectB.disabled = true;
+      } else {
+        selectA.disabled = false;
+        selectB.disabled = false;
+      }
+    }
+
+    function openCupidModal(idx) {
+      cupidModalIndex = idx;
+      populateCupidOptions();
+      const modal = document.getElementById('cupid-modal');
+      modal.style.display = 'flex';
+    }
+
+    function closeCupidModal() {
+      const modal = document.getElementById('cupid-modal');
+      modal.style.display = 'none';
+      cupidModalIndex = null;
+    }
+
+    function handleCupidBackdrop(event) {
+      if (event.target.id === 'cupid-modal') {
+        closeCupidModal();
+      }
+    }
+
+    function confirmCupidSelection() {
+      if (cupidModalIndex === null || !currentRenderedList[cupidModalIndex]) {
+        closeCupidModal();
+        return;
+      }
+
+      const selectA = document.getElementById('cupid-player-a');
+      const selectB = document.getElementById('cupid-player-b');
+      const firstName = selectA?.value;
+      const secondName = selectB?.value;
+
+      if (!firstName && !secondName) {
+        currentRenderedList.forEach((item) => {
+          if (item.status === 'عشيق') {
+            item.status = 'حي';
+          }
+          item.statusConfirmed = Boolean(item.statusConfirmed && item.status !== 'عشيق');
+        });
+
+        saveDistributionState();
+        closeCupidModal();
+        window.location.reload();
+        return;
+      }
+
+      if (!firstName || !secondName) {
+        alert('يرجى اختيار لاعبين أحياء من القائمتين أو تركهما فارغين لإلغاء حالة العشيق.');
+        return;
+      }
+
+      if (firstName === secondName) {
+        alert('يجب اختيار لاعبين مختلفين.');
+        return;
+      }
+
+      const firstPlayer = currentRenderedList.find((item) => item.name === firstName);
+      const secondPlayer = currentRenderedList.find((item) => item.name === secondName);
+
+      if (!firstPlayer || !secondPlayer || !isPlayerAlive(firstPlayer) || !isPlayerAlive(secondPlayer)) {
+        alert('الاختيار غير صالح. اختر لاعبين أحياء فقط.');
+        populateCupidOptions();
+        return;
+      }
+
+      firstPlayer.status = 'عشيق';
+      secondPlayer.status = 'عشيق';
+      firstPlayer.statusConfirmed = true;
+      secondPlayer.statusConfirmed = true;
+
+      saveDistributionState();
+      closeCupidModal();
+      window.location.reload();
     }
 
     function handleStatusChange(selectElement, idx, isCursed) {
@@ -655,6 +894,7 @@
 
       sortedList.forEach((item, idx) => {
         const isCursed = item.role.includes("الملعون");
+        const isCupid = isCupidRole(item.role);
         const tr = document.createElement('tr');
         tr.id = `player-row-${idx}`;
 
@@ -691,8 +931,13 @@
           `;
         }
 
-        if (isLover) {
-          tr.querySelector('td')?.setAttribute('style', 'font-weight: bold; color: #ff69b4;');
+        if (isCupid) {
+          boxHTML = `
+            <div id="status-box-${idx}" style="display: flex; gap: 4px; align-items: center; justify-content: center; flex-wrap: wrap;">
+              ${boxHTML}
+              ${getCupidActionButtonHtml(idx)}
+            </div>
+          `;
         }
 
         tr.innerHTML = `
