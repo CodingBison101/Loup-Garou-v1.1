@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loup-Garou - Role Distribution</title>
+  <style>
+    html {
+      overscroll-behavior-y: none;
+    }
+
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 95vh;
+      margin: 0;
+      padding: 15px;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      overscroll-behavior-y: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    h2 {
+      color: #e50914;
+      font-size: 26px;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Player Name Box */
+    .player-card {
+      background-color: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      width: 100%;
+      padding: 15px;
+      margin-bottom: 25px;
+      box-sizing: border-box;
+    }
+
+    .player-name {
+      font-size: 26px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    /* Interactive Question Mark Frame */
+    .hold-circle {
+      width: 160px;
+      height: 160px;
+      border-radius: 16px;
+      background-color: #a50810;
+      border: 4px solid #E50914;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(235, 3, 3, 0.6);
+      transition: transform 0.1s ease, background-color 0.2s ease;
+      margin-bottom: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #question-mark {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 100px;
+      line-height: 1;
+      transform: translateY(30px);
+    }
+
+    .hold-circle:active {
+      transform: scale(0.92);
+      box-shadow: 0 0 35px rgba(13, 110, 253, 0.9);
+    }
+
+    .hold-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    /* Secret Role Text Display Below Circle */
+    .role-reveal-box {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .role-text {
+      font-size: 28px;
+      font-weight: bold;
+      color: #e50914;
+      text-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
+    }
+
+    .instruction-text {
+      color: #888;
+      font-size: 15px;
+    }
+
+    /* Action Button states for Role Distribution Phase */
+    .btn-red {
+      width: 100%;
+      padding: 16px;
+      background-color: #e50914;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4);
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-red:disabled {
+      background-color: #e50914;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.4;
+      color: white;
+    }
+
+    .btn-green {
+      width: 100%;
+      padding: 16px;
+      background-color: #28a745;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Moderator Screen Table */
+    .mod-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 25px;
+      background-color: #1a1a1a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .mod-table th, .mod-table td {
+      padding: 10px 4px;
+      border-bottom: 1px solid #333;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .mod-table th {
+      background-color: #222;
+      color: #e50914;
+      font-size: 15px;
+    }
+
+    .mod-table td {
+      font-size: 14px;
+    }
+
+    .status-select {
+      width: 85px;
+      padding: 5px;
+      font-size: 12px;
+      background: #222;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 4px;
+      text-align: center;
+      outline: none;
+    }
+
+    .status-btn {
+      padding: 4px 6px;
+      font-size: 11px;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Styles specifically for Cursed special layout */
+    .cursed-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-select-cursed {
+      width: 100px;
+      padding: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      background: #222;
+      border: 1px solid #e50914;
+      color: #ff6b6b;
+      border-radius: 4px;
+      text-align: center;
+      outline: none;
+    }
+
+    .status-btn-cursed {
+      width: 100px;
+      padding: 5px;
+      font-size: 12px;
+      background: #e50914;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .edit-btn {
+      padding: 2px 5px;
+      font-size: 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STEP 1: PLAYER SECRET REVEAL SCREEN (توزيع الأدوار) -->
+  <div id="player-phase" class="container">
+    <h2>توزيع الأدوار</h2>
+    <p>سلم الهاتف للاعب المذكور اسمه</p>
+
+    <div class="player-card">
+      <div id="player-name-display" class="player-name">اسم اللاعب</div>
+    </div>
+
+    <!-- CLICK TILE FOR IMAGE REVEAL -->
+    <div id="hold-btn" class="hold-circle">
+      <span id="question-mark">?</span>
+      <img id="role-img" src="" alt="">
+    </div>
+
+    <!-- TEXT BELOW CIRCLE -->
+    <div class="role-reveal-box">
+      <div id="role-text" class="instruction-text">اضغط على العلامة لكشف دورك</div>
+    </div>
+
+    <button id="next-btn" class="btn-red" onclick="nextPlayer()" disabled>اللاعب التالي ←</button>
+  </div>
+
+  <!-- STEP 2: MODERATOR MASTER SCREEN (شاشة المنظم) -->
+  <div id="moderator-phase" class="container hidden">
+    <h2>شاشة المنظم (L'ANIMATEUR)</h2>
+    <p>قائمة الأدوار الكاملة للتحكم في اللعبة</p>
+
+    <table class="mod-table">
+      <thead>
+        <tr>
+          <th style="width: 32%;">اسم اللاعب</th>
+          <th style="width: 32%;">الدور</th>
+          <th style="width: 36%;">الحالة</th>
+        </tr>
+      </thead>
+      <tbody id="mod-list"></tbody>
+    </table>
+
+    <button id="end-game-btn" class="btn-red" onclick="confirmEndGame()">إنهاء وإنشاء لعبة جديدة</button>
+  </div>
+
+  <script>
+    const currentPage = 'distribution.html';
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('loupGarouLastClosedPage', currentPage);
+    });
+
+    let players = [];
+    let assignedRoles = [];
+    let currentIndex = 0;
+    let masterList = [];
+    let currentRenderedList = [];
+    let currentRevealed = false;
+    let moderatorRevealTimer = null;
+    let moderatorRevealReady = false;
+    const distributionStateKey = 'loupGarouDistributionState';
+
+    // Linking Arabic role names to English filenames directly in the same folder
+    const roleImages = {
+      "الذئب الكبير": "big_wolf.png",
+      "الذئب الأبيض": "white_wolf.png",
+      "الذئب": "wolf 1.png",
+      "الذئب الكاهن": "Loup-Garou_Voyant.png",
+      "الملعون": "cursed.png",
+      "الكاهن": "priest.png",
+      "الساحر": "witch.png",
+      "الحامي": "guard.png",
+      "الصياد": "hunter.png",
+      "القاضي": "judge.png",
+      "الوريث": "heir.png",
+      "الغراب": "raven.png",
+      "الثعلب": "fox.png",
+      "أحمق القرية": "village_idiot.png",
+      "مواطن بسيط": "villager.png",
+      "الحكيم": "Ancien.png",
+      "الكوميديان": "comedian.png",
+      "عصفور الحب": "cupid.png",
+      "الخادمة الوفيّة": "maid.png",
+      "الفارس": "rust.png",
+      "اللص": "Voleur.png",
+      "الزومبي": "zombie.png"
+    };
+
+    function init() {
+      const savedState = localStorage.getItem(distributionStateKey);
+
+      if (savedState) {
+        try {
+          const parsedState = JSON.parse(savedState);
+          players = Array.isArray(parsedState.players) ? parsedState.players : [];
+          assignedRoles = Array.isArray(parsedState.assignedRoles) ? parsedState.assignedRoles : [];
+          currentIndex = Number.isInteger(parsedState.currentIndex) ? parsedState.currentIndex : 0;
+          currentRevealed = Boolean(parsedState.currentRevealed);
+          masterList = Array.isArray(parsedState.masterList)
+            ? parsedState.masterList.map((item) => ({
+                name: item.name,
+                role: item.role,
+                status: item.status || 'حي',
+                statusConfirmed: Boolean(item.statusConfirmed)
+              }))
+            : [];
+        } catch (error) {
+          players = [];
+          assignedRoles = [];
+          masterList = [];
+        }
+      }
+
+      if (!players.length || !assignedRoles.length || !masterList.length) {
+        const savedPlayers = localStorage.getItem('loupGarouPlayers');
+        const savedRoles = localStorage.getItem('loupGarouRoles');
+
+        if (!savedPlayers || !savedRoles) {
+          alert("خطأ في البيانات! يرجى البدء من جديد.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        players = JSON.parse(savedPlayers);
+        const rolesObj = JSON.parse(savedRoles);
+
+        let deck = [];
+        rolesObj.forEach(r => {
+          for (let i = 0; i < r.count; i++) {
+            deck.push(r.name);
+          }
+        });
+
+        // Shuffle roles
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+
+        assignedRoles = deck;
+        masterList = players.map((p, idx) => ({
+          name: p,
+          role: assignedRoles[idx] || "مواطن بسيط",
+          status: 'حي',
+          statusConfirmed: false
+        }));
+        currentIndex = 0;
+        currentRevealed = false;
+      }
+
+      setupClickEvents();
+
+      if (currentIndex >= players.length) {
+        showModeratorScreen();
+      } else {
+        loadCurrentPlayer();
+      }
+
+      saveDistributionState();
+      window.addEventListener('beforeunload', saveDistributionState);
+    }
+
+    function saveDistributionState() {
+      localStorage.setItem(distributionStateKey, JSON.stringify({
+        players,
+        assignedRoles,
+        currentIndex,
+        currentRevealed,
+        masterList
+      }));
+    }
+
+    function clearDistributionState() {
+      localStorage.removeItem(distributionStateKey);
+    }
+
+    function loadCurrentPlayer() {
+      if (currentIndex < players.length) {
+        document.getElementById('player-name-display').innerText = players[currentIndex];
+        const roleText = document.getElementById('role-text');
+        const nextBtn = document.getElementById('next-btn');
+        const qMark = document.getElementById('question-mark');
+        const img = document.getElementById('role-img');
+
+        if (currentRevealed) {
+          const currentRole = masterList[currentIndex].role;
+          const imagePath = roleImages[currentRole] || "villager.png";
+          img.src = imagePath;
+          qMark.style.display = 'none';
+          img.style.display = 'block';
+          roleText.className = 'role-text';
+          roleText.innerText = currentRole;
+          nextBtn.disabled = false;
+          nextBtn.className = 'btn-green';
+          nextBtn.innerText = currentIndex === players.length - 1
+            ? 'إظهار قائمة الحالات'
+            : 'اللاعب التالي ←';
+        } else {
+          roleText.className = 'instruction-text';
+          roleText.innerText = "اضغط على العلامة لكشف دورك";
+          nextBtn.disabled = true;
+          nextBtn.className = 'btn-red';
+          nextBtn.innerText = 'اللاعب التالي ←';
+          qMark.style.display = 'inline';
+          img.style.display = 'none';
+          img.src = '';
+        }
+      } else {
+        showModeratorScreen();
+      }
+    }
+
+    function setupClickEvents() {
+      const holdBtn = document.getElementById('hold-btn');
+      const qMark = document.getElementById('question-mark');
+      const img = document.getElementById('role-img');
+      const roleText = document.getElementById('role-text');
+      const nextBtn = document.getElementById('next-btn');
+
+      const handleClick = (e) => {
+        e.preventDefault();
+        const currentRole = masterList[currentIndex].role;
+        
+        // Link Arabic role name to English filename
+        const imagePath = roleImages[currentRole] || "villager.png";
+        img.src = imagePath;
+        
+        qMark.style.display = 'none';
+        img.style.display = 'block';
+
+        // Show Role Text BELOW Circle
+        roleText.className = 'role-text';
+        roleText.innerText = currentRole;
+
+        // Enable button and make it green once role is revealed
+        currentRevealed = true;
+        saveDistributionState();
+        nextBtn.disabled = false;
+        nextBtn.className = 'btn-green';
+        nextBtn.innerText = currentIndex === players.length - 1
+          ? 'إظهار قائمة الحالات'
+          : 'اللاعب التالي ←';
+      };
+
+      holdBtn.addEventListener('click', handleClick);
+      holdBtn.addEventListener('touchend', (e) => {
+        // Prevent default double-firing on mobile touch devices
+        e.preventDefault();
+        handleClick(e);
+      });
+    }
+
+    function nextPlayer() {
+      if (currentIndex === players.length - 1) {
+        startModeratorReveal();
+        return;
+      }
+
+      currentIndex++;
+      currentRevealed = false;
+      saveDistributionState();
+      loadCurrentPlayer();
+    }
+
+    function startModeratorReveal() {
+      if (moderatorRevealTimer) return;
+
+      if (moderatorRevealReady) {
+        currentIndex++;
+        currentRevealed = false;
+        saveDistributionState();
+        showModeratorScreen();
+        return;
+      }
+
+      const nextBtn = document.getElementById('next-btn');
+      let timeLeft = 5;
+      nextBtn.disabled = true;
+      nextBtn.innerText = `إظهار القائمة بعد ${timeLeft}`;
+
+      moderatorRevealTimer = setInterval(() => {
+        timeLeft--;
+
+        if (timeLeft > 0) {
+          nextBtn.innerText = `إظهار القائمة بعد ${timeLeft}`;
+          return;
+        }
+
+        clearInterval(moderatorRevealTimer);
+        moderatorRevealTimer = null;
+        moderatorRevealReady = true;
+        nextBtn.disabled = false;
+        nextBtn.className = 'btn-green';
+        nextBtn.innerText = 'متابعة إلى قائمة الحالات';
+      }, 1000);
+    }
+
+    function getRolePriority(roleName) {
+      if (roleName.includes("ذئب") || roleName.includes("الذئب")) return 1;
+      if (roleName.includes("الملعون")) return 2;                          
+      if (roleName.includes("مواطن بسيط")) return 4;                         
+      return 3;                                                             
+    }
+
+    function buildStatusOptions(currentVal, isCursed) {
+      const baseOptions = isCursed
+        ? ["حي", "ميت", "ساكت", "محمي", "مخري عليه", "عشيق", "يتحول إلى دئب"]
+        : ["حي", "ميت", "ساكت", "محمي", "مخري عليه", "عشيق"];
+
+      let optionsHTML = baseOptions.map((option) => {
+        return `<option value="${option}" ${currentVal === option ? 'selected' : ''}>${option}</option>`;
+      }).join('');
+
+      if (currentVal && !baseOptions.includes(currentVal)) {
+        optionsHTML += `<option value="${currentVal}" selected>${currentVal}</option>`;
+      }
+
+      optionsHTML += `<option value="__custom__">اضافة..</option>`;
+      return optionsHTML;
+    }
+
+    function handleStatusChange(selectElement, idx, isCursed) {
+      const item = currentRenderedList[idx];
+      if (item) {
+        item.statusConfirmed = false;
+      }
+
+      if (selectElement.value !== '__custom__') {
+        if (item) {
+          item.status = selectElement.value;
+          item.statusConfirmed = false;
+        }
+        selectElement.dataset.previousValue = selectElement.value;
+        saveDistributionState();
+        return;
+      }
+
+      const customStatus = prompt('أدخل النص الجديد للحالة:');
+      if (!customStatus || !customStatus.trim()) {
+        selectElement.value = selectElement.dataset.previousValue || 'حي';
+        if (item) {
+          item.status = selectElement.value;
+        }
+        saveDistributionState();
+        return;
+      }
+
+      const value = customStatus.trim();
+      const existingOption = Array.from(selectElement.options).find((option) => option.value === value);
+
+      if (!existingOption) {
+        const customOption = document.createElement('option');
+        customOption.value = value;
+        customOption.textContent = value;
+        selectElement.insertBefore(customOption, selectElement.querySelector('option[value="__custom__"]'));
+      }
+
+      selectElement.value = value;
+      selectElement.dataset.previousValue = value;
+      if (item) {
+        item.status = value;
+        item.statusConfirmed = false;
+      }
+      saveDistributionState();
+    }
+
+    function showModeratorScreen() {
+      document.getElementById('player-phase').classList.add('hidden');
+      document.getElementById('moderator-phase').classList.remove('hidden');
+
+      const sortedList = [...masterList].sort((a, b) => {
+        return getRolePriority(a.role) - getRolePriority(b.role);
+      });
+
+      currentRenderedList = sortedList;
+
+      const tbody = document.getElementById('mod-list');
+      tbody.innerHTML = '';
+
+      sortedList.forEach((item, idx) => {
+        const isCursed = item.role.includes("الملعون");
+        const tr = document.createElement('tr');
+        tr.id = `player-row-${idx}`;
+
+        const currentStatus = item.status || 'حي';
+        const isLover = currentStatus === 'عشيق';
+
+        let boxHTML = '';
+        if (item.statusConfirmed) {
+          const isDead = currentStatus.includes("ميت") || currentStatus.includes("ميّت");
+          boxHTML = `
+            <div id="status-box-${idx}" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <span style="font-size: 13px; font-weight: bold; color: ${isDead ? '#e50914' : '#28a745'};">${currentStatus}</span>
+              <button class="edit-btn" onclick="editStatus(${idx}, '${currentStatus.replace(/'/g, "\\'")}', '${item.name.replace(/'/g, "\\'")}', ${isCursed})">✏️</button>
+            </div>
+          `;
+          tr.style.opacity = isDead ? '0.4' : '1';
+        } else if (isCursed) {
+          boxHTML = `
+            <div id="status-box-${idx}" class="cursed-container">
+              <select id="status-select-${idx}" class="status-select-cursed" onchange="handleStatusChange(this, ${idx}, ${isCursed})" data-previous-value="${currentStatus}">
+                ${buildStatusOptions(currentStatus, true)}
+              </select>
+              <button class="status-btn-cursed" onclick="confirmStatus(${idx}, '${item.name.replace(/'/g, "\\'")}', ${isCursed})">✓ تأكيد</button>
+            </div>
+          `;
+        } else {
+          boxHTML = `
+            <div id="status-box-${idx}" style="display: flex; gap: 4px; align-items: center; justify-content: center;">
+              <select id="status-select-${idx}" class="status-select" onchange="handleStatusChange(this, ${idx}, ${isCursed})" data-previous-value="${currentStatus}">
+                ${buildStatusOptions(currentStatus, false)}
+              </select>
+              <button class="status-btn" onclick="confirmStatus(${idx}, '${item.name.replace(/'/g, "\\'")}', ${isCursed})">تأكيد</button>
+            </div>
+          `;
+        }
+
+        if (isLover) {
+          tr.querySelector('td')?.setAttribute('style', 'font-weight: bold; color: #ff69b4;');
+        }
+
+        tr.innerHTML = `
+          <td style="font-weight: bold; color: ${isLover ? '#ff69b4' : '#ffffff'};">${item.name}</td>
+          <td style="color: #e50914; font-weight: bold;">${item.role}</td>
+          <td>${boxHTML}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function confirmStatus(idx, playerName, isCursed) {
+      const selectElement = document.getElementById(`status-select-${idx}`);
+      const val = selectElement.value;
+
+      if (!val) {
+        alert("يرجى اختيار الحالة أولاً!");
+        return;
+      }
+
+      const firstCheck = confirm(`تأكيد أولي: هل تريد تغيير حالة اللاعب (${playerName}) إلى: "${val}"؟`);
+      if (!firstCheck) return;
+
+      const box = document.getElementById(`status-box-${idx}`);
+      const isDead = val.includes("ميت") || val.includes("ميّت");
+      const item = currentRenderedList[idx];
+      if (item) {
+        item.status = val;
+        item.statusConfirmed = true;
+      }
+      
+      box.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span style="font-size: 13px; font-weight: bold; color: ${isDead ? '#e50914' : '#28a745'};">${val}</span>
+          <button class="edit-btn" onclick="editStatus(${idx}, '${val.replace(/'/g, "\\'")}', '${playerName.replace(/'/g, "\\'")}', ${isCursed})">✏️</button>
+        </div>
+      `;
+
+      const row = document.getElementById(`player-row-${idx}`);
+      if (isDead) {
+        row.style.opacity = '0.4';
+      } else {
+        row.style.opacity = '1';
+      }
+
+      saveDistributionState();
+    }
+
+    function editStatus(idx, currentVal, playerName, isCursed) {
+      const box = document.getElementById(`status-box-${idx}`);
+      const item = currentRenderedList[idx];
+      
+      if (isCursed) {
+        box.className = "cursed-container";
+        box.innerHTML = `
+          <select id="status-select-${idx}" class="status-select-cursed" onchange="handleStatusChange(this, ${idx}, ${isCursed})" data-previous-value="${currentVal.replace(/'/g, "\\'")}">
+            ${buildStatusOptions(currentVal, true)}
+          </select>
+          <button class="status-btn-cursed" onclick="confirmStatus(${idx}, '${playerName.replace(/'/g, "\\'")}', ${isCursed})">✓ تأكيد</button>
+        `;
+      } else {
+        box.style = "display: flex; gap: 4px; align-items: center; justify-content: center;";
+        box.innerHTML = `
+          <select id="status-select-${idx}" class="status-select" onchange="handleStatusChange(this, ${idx}, ${isCursed})" data-previous-value="${currentVal.replace(/'/g, "\\'")}">
+            ${buildStatusOptions(currentVal, false)}
+          </select>
+          <button class="status-btn" onclick="confirmStatus(${idx}, '${playerName.replace(/'/g, "\\'")}', ${isCursed})">تأكيد</button>
+        `;
+      }
+      document.getElementById(`player-row-${idx}`).style.opacity = '1';
+
+      if (item) {
+        item.status = currentVal;
+        item.statusConfirmed = false;
+      }
+
+      saveDistributionState();
+    }
+
+    function confirmEndGame() {
+      const btn = document.getElementById('end-game-btn');
+      
+      const firstCheck = confirm("هل أنت متأكد أنك تريد إنهاء اللعبة؟ (يجب الانتظار 5 ثوانٍ للتأكيد النهائي)");
+      if (!firstCheck) return;
+
+      let timeLeft = 5;
+      btn.disabled = true;
+      btn.innerText = `الرجاء الانتظار... ${timeLeft}`;
+      
+      const countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          btn.innerText = `الرجاء الانتظار... ${timeLeft}`;
+        } else {
+          clearInterval(countdownInterval);
+          btn.innerText = "إنهاء وإنشاء لعبة جديدة";
+          btn.disabled = false;
+          
+          setTimeout(() => {
+            const finalCheck = confirm("انتهى وقت الانتظار! هل أنت متأكد تماماً من إنهاء اللعبة والعودة للشاشة الرئيسية؟");
+            if (finalCheck) {
+              clearDistributionState();
+              localStorage.removeItem('loupGarouLastClosedPage');
+              window.location.href = "index.html";
+            }
+          }, 100);
+        }
+      }, 1000);
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

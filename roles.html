@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loup-Garou - Roles Setup</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 95vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      color: #e50914;
+      font-size: 26px;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* Player Count Info Header */
+    .info-box {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 15px;
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      color: #e50914;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Roles List */
+    .roles-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .role-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 10px 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .role-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .counter-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-counter {
+      background-color: #2a2a2a;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 6px;
+      width: 35px;
+      height: 35px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    .btn-counter:active {
+      background-color: #e50914;
+    }
+
+    .role-count {
+      font-size: 18px;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+      color: #e50914;
+    }
+
+    /* Add Custom Role Button */
+    .btn-add-role {
+      background-color: #222;
+      color: #28a745;
+      border: 1px solid #28a745;
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    /* Next / Main Red Button */
+    .btn-red {
+      width: 100%;
+      padding: 16px;
+      background-color: #e50914;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-red:active {
+      transform: scale(0.96);
+    }
+
+    .btn-back {
+      color: #888;
+      font-size: 14px;
+      margin-top: 15px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>تحديد الأدوار</h2>
+    <p>حدد عدد كل دور في اللعبة</p>
+
+    <div class="info-box" id="player-summary">
+      عدد اللاعبين المطلوب: 0 | الأدوار المحددة: 0
+    </div>
+
+    <!-- Dynamic List of Roles -->
+    <div id="roles-list" class="roles-list"></div>
+
+    <!-- Button to Add Custom Role -->
+    <button class="btn-add-role" onclick="addCustomRole()">+ إضافة دور جديد</button>
+
+    <button class="btn-red" onclick="confirmRoles()">بدء اللعبة</button>
+    <a href="names.html" class="btn-back">← العودة للأسماء</a>
+  </div>
+
+  <script>
+    const currentPage = 'roles.html';
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('loupGarouLastClosedPage', currentPage);
+    });
+
+    const defaultRoles = [
+      { name: "الذئب الكبير", count: 1 },
+      { name: "الذئب الأبيض", count: 0 },
+      { name: "الذئب", count: 0 },
+      { name: "الذئب الكاهن", count: 0 },
+      { name: "الملعون", count: 0 },
+      { name: "الكاهن", count: 1 },
+      { name: "الساحر", count: 1 },
+      { name: "الحامي", count: 1 },
+      { name: "الصياد", count: 1 },
+      { name: "القاضي", count: 0 },
+      { name: "الوريث", count: 0 },
+      { name: "الغراب", count: 0 },
+      { name: "الثعلب", count: 0 },
+      { name: "أحمق القرية", count: 0 },
+      { name: "مواطن بسيط", count: 0 },
+      { name: "عصفور الحب", count: 0 },
+      { name: "الخادمة الوفيّة", count: 0 },
+      { name: "الفارس", count: 0 },
+      { name: "اللص", count: 0 },
+      { name: "الزومبي", count: 0 },
+      { name: "الحكيم", count: 0 },
+      { name: "الكوميديان", count: 0 }
+    ];
+
+    // List of initial default roles including the new ones inserted between الصياد and مواطن بسيط
+    let roles = [...defaultRoles];
+
+    let totalPlayers = 0;
+
+    function saveRolesState() {
+      localStorage.setItem('loupGarouRoles', JSON.stringify(roles));
+    }
+
+    function loadSavedRoles() {
+      const savedRoles = localStorage.getItem('loupGarouRoles');
+
+      if (!savedRoles) {
+        roles = [...defaultRoles];
+        return;
+      }
+
+      try {
+        const parsedRoles = JSON.parse(savedRoles);
+        if (Array.isArray(parsedRoles) && parsedRoles.length > 0) {
+          const savedRoleMap = new Map(parsedRoles.map((role) => [role.name, role.count]));
+          const mergedRoles = defaultRoles.map((defaultRole) => ({
+            name: defaultRole.name,
+            count: savedRoleMap.has(defaultRole.name) ? savedRoleMap.get(defaultRole.name) : defaultRole.count
+          }));
+
+          parsedRoles.forEach((savedRole) => {
+            if (!defaultRoles.some((defaultRole) => defaultRole.name === savedRole.name)) {
+              mergedRoles.push(savedRole);
+            }
+          });
+
+          roles = mergedRoles;
+          return;
+        }
+      } catch (error) {
+        // Fall back to defaults below.
+      }
+
+      roles = [...defaultRoles];
+    }
+
+    // Load total players count from previous page
+    function init() {
+      loadSavedRoles();
+
+      const savedPlayers = localStorage.getItem('loupGarouPlayers');
+      if (savedPlayers) {
+        const playersArray = JSON.parse(savedPlayers);
+        totalPlayers = playersArray.length;
+      }
+      renderRoles();
+    }
+
+    function renderRoles() {
+      const container = document.getElementById('roles-list');
+      container.innerHTML = '';
+
+      let totalSelectedRoles = 0;
+
+      roles.forEach((role, index) => {
+        totalSelectedRoles += role.count;
+
+        const row = document.createElement('div');
+        row.className = 'role-row';
+        row.innerHTML = `
+          <span class="role-name">${role.name}</span>
+          <div class="counter-controls">
+            <button class="btn-counter" onclick="changeCount(${index}, -1)">-</button>
+            <span class="role-count">${role.count}</span>
+            <button class="btn-counter" onclick="changeCount(${index}, 1)">+</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      // Update total indicator banner
+      const summaryBox = document.getElementById('player-summary');
+      summaryBox.innerText = `عدد اللاعبين: ${totalPlayers} | مجموع الأدوار: ${totalSelectedRoles}`;
+      
+      if (totalSelectedRoles === totalPlayers && totalPlayers > 0) {
+        summaryBox.style.color = '#28a745'; // Green when matching
+        summaryBox.style.borderColor = '#28a745';
+      } else {
+        summaryBox.style.color = '#e50914'; // Red when mismatching
+        summaryBox.style.borderColor = '#e50914';
+      }
+    }
+
+    function changeCount(index, amount) {
+      if (roles[index].count + amount >= 0) {
+        roles[index].count += amount;
+        saveRolesState();
+        renderRoles();
+      }
+    }
+
+    function addCustomRole() {
+      const newRoleName = prompt("أدخل اسم الدور الجديد:");
+      if (newRoleName && newRoleName.trim() !== "") {
+        roles.push({ name: newRoleName.trim(), count: 1 });
+        saveRolesState();
+        renderRoles();
+      }
+    }
+
+    function confirmRoles() {
+      const totalSelectedRoles = roles.reduce((sum, r) => sum + r.count, 0);
+
+      if (totalPlayers > 0 && totalSelectedRoles !== totalPlayers) {
+        alert(`تنبيه: مجموع الأدوار (${totalSelectedRoles}) لا يطابق عدد اللاعبين (${totalPlayers})!`);
+        return;
+      }
+
+      // Starting a fresh game should not reuse an old distribution snapshot.
+      localStorage.removeItem('loupGarouDistributionState');
+
+      // Save roles list to local storage
+      saveRolesState();
+
+      // Navigate directly to distribution screen
+      window.location.href = "distribution.html";
+    }
+
+    // Initialize on page load
+    init();
+  </script>
+
+</body>
+</html>

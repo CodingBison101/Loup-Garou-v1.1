@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loup-Garou - Player Names</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 95vh;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      color: #e50914;
+      font-size: 26px;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    p {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Section Headers */
+    .section-title {
+      width: 100%;
+      font-size: 16px;
+      color: #ddd;
+      margin-bottom: 10px;
+      font-weight: bold;
+      text-align: right;
+    }
+
+    /* Pool of Clickable Names */
+    .pool-container {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .pool-chip {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .pool-chip:hover {
+      background-color: #e50914;
+      border-color: #e50914;
+    }
+
+    .pool-chip.selected {
+      background-color: #333;
+      color: #666;
+      border-color: #222;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+
+    /* Custom Name Input Area */
+    .custom-input-row {
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .custom-input {
+      flex: 1;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: white;
+      padding: 10px 12px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .custom-input:focus {
+      border-color: #e50914;
+    }
+
+    .btn-add-custom {
+      background-color: #222;
+      color: #28a745;
+      border: 1px solid #28a745;
+      border-radius: 8px;
+      padding: 0 15px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    /* Selected Player List Container */
+    .player-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    /* Individual Player Row */
+    .player-row {
+      display: flex;
+      align-items: center;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px 12px;
+      gap: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    .player-number {
+      color: #e50914;
+      font-weight: bold;
+      width: 25px;
+      font-size: 16px;
+    }
+
+    .player-name-text {
+      flex: 1;
+      color: white;
+      font-size: 18px;
+      padding: 4px;
+    }
+
+    /* Control Buttons (Up, Down, Delete) */
+    .btn-action {
+      background-color: #2a2a2a;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 5px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      user-select: none;
+    }
+
+    .btn-action:active {
+      background-color: #444;
+    }
+
+    .btn-delete {
+      color: #ff4d4d;
+      border-color: #661111;
+    }
+
+    .btn-red {
+      width: 100%;
+      padding: 16px;
+      background-color: #e50914;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-back {
+      color: #888;
+      font-size: 14px;
+      margin-top: 15px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>قائمة اللاعبين</h2>
+    <p>انقر على أي اسم لإضافته للتشكيلة، أو اكتب اسماً جديداً بالأسفل</p>
+
+    <!-- Preset Pool of Names -->
+    <div class="section-title">اختر من القائمة الجاهزة:</div>
+    <div id="pool-container" class="pool-container"></div>
+
+    <!-- Custom Name Input -->
+    <div class="custom-input-row">
+      <input type="text" id="custom-name-input" class="custom-input" placeholder="اكتب اسم لاعب جديد..." onkeypress="handleKeyPress(event)">
+      <button class="btn-add-custom" onclick="addCustomPlayer()">+ إضافة</button>
+    </div>
+
+    <!-- Active Selected Player List -->
+    <div class="section-title">التشكيلة الحالية للمباراة:</div>
+    <div id="player-list" class="player-list"></div>
+
+    <button class="btn-red" onclick="saveAndNext()">التالي (اختيار الأدوار)</button>
+    <a href="index.html" class="btn-back">← العودة للرئيسية</a>
+  </div>
+
+  <script>
+    const currentPage = 'names.html';
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('loupGarouLastClosedPage', currentPage);
+    });
+
+    // Pool of available preset names (updated with زامو، سيفو، عدة)
+    const availablePool = [
+      "حسني", "بلال", "ياسين", "إبراهيم", "مولود", 
+      "بيبو", "عابد درار", "عابد شلف", "دودو", "قادة", 
+      "يونس", "الشيخ كبير", "الشيخ صغير", "أحمد لعريش", "أمين", 
+      "أحمد درار", "براحو", "أيمن", "زامو", "سيفو", "عدة"
+    ];
+
+    // Active players chosen for the game (starts empty)
+    let selectedPlayers = [];
+
+    function renderUI() {
+      renderPool();
+      renderSelectedList();
+    }
+
+    function renderPool() {
+      const poolContainer = document.getElementById('pool-container');
+      poolContainer.innerHTML = '';
+
+      availablePool.forEach(name => {
+        const chip = document.createElement('div');
+        chip.className = 'pool-chip';
+        
+        const isSelected = selectedPlayers.includes(name);
+        if (isSelected) {
+          chip.classList.add('selected');
+        } else {
+          chip.onclick = () => selectPresetName(name);
+        }
+        
+        chip.textContent = name;
+        poolContainer.appendChild(chip);
+      });
+    }
+
+    function renderSelectedList() {
+      const listContainer = document.getElementById('player-list');
+      listContainer.innerHTML = '';
+
+      if (selectedPlayers.length === 0) {
+        listContainer.innerHTML = '<div style="color: #666; font-size: 14px; text-align: center; padding: 10px;">لم يتم اختيار أي لاعب بعد</div>';
+        return;
+      }
+
+      selectedPlayers.forEach((name, index) => {
+        const row = document.createElement('div');
+        row.className = 'player-row';
+
+        row.innerHTML = `
+          <span class="player-number">${index + 1}</span>
+          <span class="player-name-text">${name}</span>
+          <button class="btn-action" onclick="moveUp(${index})" ${index === 0 ? 'disabled style="opacity:0.3"' : ''}>▲</button>
+          <button class="btn-action" onclick="moveDown(${index})" ${index === selectedPlayers.length - 1 ? 'disabled style="opacity:0.3"' : ''}>▼</button>
+          <button class="btn-action btn-delete" onclick="removePlayer(${index})">✕</button>
+        `;
+
+        listContainer.appendChild(row);
+      });
+    }
+
+    function selectPresetName(name) {
+      if (!selectedPlayers.includes(name)) {
+        selectedPlayers.push(name);
+        renderUI();
+      }
+    }
+
+    function addCustomPlayer() {
+      const input = document.getElementById('custom-name-input');
+      const name = input.value.trim();
+
+      if (name === "") return;
+
+      if (selectedPlayers.includes(name)) {
+        alert("هذا اللاعب موجود بالفعل في التشكيلة!");
+        return;
+      }
+
+      selectedPlayers.push(name);
+      input.value = '';
+      renderUI();
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        addCustomPlayer();
+      }
+    }
+
+    function removePlayer(index) {
+      selectedPlayers.splice(index, 1);
+      renderUI();
+    }
+
+    function moveUp(index) {
+      if (index > 0) {
+        const temp = selectedPlayers[index];
+        selectedPlayers[index] = selectedPlayers[index - 1];
+        selectedPlayers[index - 1] = temp;
+        renderUI();
+      }
+    }
+
+    function moveDown(index) {
+      if (index < selectedPlayers.length - 1) {
+        const temp = selectedPlayers[index];
+        selectedPlayers[index] = selectedPlayers[index + 1];
+        selectedPlayers[index + 1] = temp;
+        renderUI();
+      }
+    }
+
+    function saveAndNext() {
+      if (selectedPlayers.length < 4) {
+        alert("يجب اختيار 4 لاعبين على الأقل للمتابعة!");
+        return;
+      }
+      localStorage.setItem('loupGarouPlayers', JSON.stringify(selectedPlayers));
+      window.location.href = "roles.html";
+    }
+
+    // Initial render
+    renderUI();
+  </script>
+
+</body>
+</html>
