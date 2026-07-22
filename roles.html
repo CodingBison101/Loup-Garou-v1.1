@@ -41,17 +41,42 @@
     }
 
     /* Player Count Info Header */
+    .summary-row {
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      margin-bottom: 20px;
+      direction: ltr;
+    }
+
     .info-box {
       background-color: #1a1a1a;
       border: 1px solid #333;
       border-radius: 8px;
       padding: 10px 15px;
-      width: 100%;
+      flex: 1;
       text-align: center;
       font-weight: bold;
       color: #e50914;
-      margin-bottom: 20px;
       box-sizing: border-box;
+    }
+
+    .btn-reset-all {
+      min-width: 60px;
+      background-color: #222;
+      color: #fff;
+      border: 1px solid #fff;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      padding: 10px 12px;
+      white-space: nowrap;
+    }
+
+    .btn-reset-all:active {
+      background-color: #444;
     }
 
     /* Roles List */
@@ -161,8 +186,11 @@
     <h2>تحديد الأدوار</h2>
     <p>حدد عدد كل دور في اللعبة</p>
 
-    <div class="info-box" id="player-summary">
-      عدد اللاعبين المطلوب: 0 | الأدوار المحددة: 0
+    <div class="summary-row">
+      <button class="btn-reset-all" onclick="resetAllRoles()">مسح</button>
+      <div class="info-box" id="player-summary">
+        عدد اللاعبين المطلوب: 0 | الأدوار المحددة: 0
+      </div>
     </div>
 
     <!-- Dynamic List of Roles -->
@@ -301,6 +329,15 @@
         saveRolesState();
         renderRoles();
       }
+    }
+
+    function resetAllRoles() {
+      roles = roles.map((role) => ({
+        ...role,
+        count: 0
+      }));
+      saveRolesState();
+      renderRoles();
     }
 
     function addCustomRole() {
